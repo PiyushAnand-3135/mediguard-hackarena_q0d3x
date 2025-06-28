@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { supabase } from "@/lib/supabaseClient" // ✅ Import existing client
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,8 +57,6 @@ Please:
 Do NOT include markdown or any explanation — return only raw JSON.
 `
 
-
-
     const mistralResponse = await fetch("http://localhost:8081/api/mistral", {
       method: "POST",
       headers: {
@@ -71,21 +70,32 @@ Do NOT include markdown or any explanation — return only raw JSON.
     }
 
     const data = await mistralResponse.json()
-    console.log("Raw Mistral response string:", data.response)
-
     let raw = data.response.trim()
-    // Remove markdown code block wrappers like ```json ... ```
     raw = raw.replace(/^```json\s*/, '').replace(/```$/, '')
 
     let parsedResponse
     try {
       parsedResponse = JSON.parse(raw)
+
+      // ✅ Insert into Supabase medications table
+      const { error: dbError } = await supabase.from("medications").insert({
+        name: parsedResponse.name,
+        description: parsedResponse.description,
+        active_ingredients: parsedResponse.activeIngredients,
+        inactive_ingredients: parsedResponse.inactiveIngredients,
+        alternatives: parsedResponse.alternatives,
+        interactions: parsedResponse.interactions,
+        side_effects: parsedResponse.sideEffects,
+      })
+
+      if (dbError) {
+        console.error("❌ Supabase insert error:", dbError)
+      }
+
     } catch (err) {
-      console.error("JSON parse error:", err)
+      console.error("❌ JSON parse error:", err)
       parsedResponse = { rawResponse: data.response }
     }
-
-    console.log("📥 Parsed Mistral response:", parsedResponse)
 
     return NextResponse.json(parsedResponse)
   } catch (err) {
