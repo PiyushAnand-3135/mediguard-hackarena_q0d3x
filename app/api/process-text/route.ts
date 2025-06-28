@@ -87,7 +87,7 @@ Do NOT include markdown or any explanation — return only raw JSON.
         interactions: parsedResponse.interactions,
         side_effects: parsedResponse.sideEffects,
       })
-
+ 
       if (dbError) {
         console.error("❌ Supabase insert error:", dbError)
       }
