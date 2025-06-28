@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Camera, Upload, X, ImageIcon } from "lucide-react"
 import Image from "next/image"
@@ -16,17 +15,20 @@ export function UploadPrescription({ onImageProcessed }: UploadPrescriptionProps
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [showCamera, setShowCamera] = useState(false)
+
+  // ----- FILE UPLOAD HANDLING -----
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Check file type
     if (!file.type.startsWith("image/")) {
       alert("Please upload an image file")
       return
     }
 
-    // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert("File size should be less than 5MB")
       return
@@ -53,6 +55,7 @@ export function UploadPrescription({ onImageProcessed }: UploadPrescriptionProps
     }
   }
 
+  // ----- DRAG AND DROP HANDLING -----
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(true)
@@ -88,6 +91,41 @@ export function UploadPrescription({ onImageProcessed }: UploadPrescriptionProps
     reader.readAsDataURL(file)
   }
 
+  // ----- CAMERA HANDLING -----
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        setShowCamera(true)
+      }
+    } catch (error) {
+      alert("Unable to access camera: " + (error as Error).message)
+    }
+  }
+
+  const stopCamera = () => {
+    const stream = videoRef.current?.srcObject as MediaStream
+    stream?.getTracks().forEach((track) => track.stop())
+    setShowCamera(false)
+  }
+
+  const captureImage = () => {
+    if (!videoRef.current || !canvasRef.current) return
+
+    const canvas = canvasRef.current
+    const context = canvas.getContext("2d")
+    const width = videoRef.current.videoWidth
+    const height = videoRef.current.videoHeight
+
+    canvas.width = width
+    canvas.height = height
+    context?.drawImage(videoRef.current, 0, 0, width, height)
+    const dataUrl = canvas.toDataURL("image/jpeg")
+    setPreviewUrl(dataUrl)
+    stopCamera()
+  }
+
   return (
     <div className="space-y-4">
       <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" ref={fileInputRef} />
@@ -95,7 +133,7 @@ export function UploadPrescription({ onImageProcessed }: UploadPrescriptionProps
       {previewUrl ? (
         <div className="relative">
           <div className="relative aspect-video w-full overflow-hidden rounded-lg shadow-inner border border-emerald-100">
-            <Image src={previewUrl || "/placeholder.svg"} alt="Prescription preview" fill className="object-contain" />
+            <Image src={previewUrl} alt="Prescription preview" fill className="object-contain" />
           </div>
           <Button
             variant="destructive"
@@ -136,7 +174,7 @@ export function UploadPrescription({ onImageProcessed }: UploadPrescriptionProps
         <Button
           variant="outline"
           className="w-full border-emerald-200 hover:bg-emerald-50 transition-colors text-xs sm:text-sm py-2 h-auto"
-          onClick={() => alert("Camera functionality would be implemented here")}
+          onClick={startCamera}
         >
           <Camera className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-emerald-500" />
           Take Photo
@@ -150,6 +188,27 @@ export function UploadPrescription({ onImageProcessed }: UploadPrescriptionProps
         >
           Analyze Medication
         </Button>
+      )}
+
+      {showCamera && (
+        <div className="relative border border-emerald-200 rounded-lg p-4 mt-4">
+          <video
+            ref={videoRef}
+            className="w-full rounded-lg aspect-video bg-black"
+            onLoadedMetadata={() => videoRef.current?.play()}
+            autoPlay
+            playsInline
+          />
+          <div className="flex gap-2 mt-4">
+            <Button onClick={captureImage} className="flex-1 bg-emerald-500 text-white">
+              Capture
+            </Button>
+            <Button variant="outline" className="flex-1" onClick={stopCamera}>
+              Cancel
+            </Button>
+          </div>
+          <canvas ref={canvasRef} className="hidden" />
+        </div>
       )}
     </div>
   )
