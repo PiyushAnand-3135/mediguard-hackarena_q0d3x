@@ -47,6 +47,9 @@ export default function ScanPage() {
     setError(null)
 
     try {
+      
+      
+      // https://easyocr-api-avf6.onrender.com/api/ocr
       const ocrResponse = await fetch("http://localhost:8000/api/ocr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
