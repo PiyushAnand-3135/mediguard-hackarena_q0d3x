@@ -77,32 +77,19 @@ Do NOT include markdown or any explanation — return only raw JSON.
     try {
       parsedResponse = JSON.parse(raw)
 
-      // ✅ Insert into Supabase medications table only if not already present
-      const { data: existing, error: fetchError } = await supabase
-        .from("medications")
-        .select("id")
-        .eq("name", parsedResponse.name)
-        .limit(1)
-        .single()
+      // ✅ Insert into Supabase medications table
+      const { error: dbError } = await supabase.from("medications").insert({
+        name: parsedResponse.name,
+        description: parsedResponse.description,
+        active_ingredients: parsedResponse.activeIngredients,
+        inactive_ingredients: parsedResponse.inactiveIngredients,
+        alternatives: parsedResponse.alternatives,
+        interactions: parsedResponse.interactions,
+        side_effects: parsedResponse.sideEffects,
+      })
 
-      if (fetchError && fetchError.code !== "PGRST116") {
-        console.error("❌ Supabase fetch error:", fetchError)
-      }
-
-      if (!existing) {
-        const { error: dbError } = await supabase.from("medications").insert({
-          name: parsedResponse.name,
-          description: parsedResponse.description,
-          active_ingredients: parsedResponse.activeIngredients,
-          inactive_ingredients: parsedResponse.inactiveIngredients,
-          alternatives: parsedResponse.alternatives,
-          interactions: parsedResponse.interactions,
-          side_effects: parsedResponse.sideEffects,
-        })
-
-        if (dbError) {
-          console.error("❌ Supabase insert error:", dbError)
-        }
+      if (dbError) {
+        console.error("❌ Supabase insert error:", dbError)
       }
 
     } catch (err) {

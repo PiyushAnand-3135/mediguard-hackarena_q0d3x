@@ -44,34 +44,40 @@ export default function LoginPage() {
       email,
       password,
       options: {
-        data: { name }, // optional user metadata
+        data: { name },
       },
     })
 
     if (error) {
       setError(error.message)
     } else {
-      setError("Check your inbox to confirm the email.")
+      setError("✅ Check your inbox to confirm the email.")
     }
 
     setIsLoading(false)
   }
 
   return (
-    <div className="container flex items-center justify-center min-h-screen py-8">
-      <div className="w-full max-w-md">
+    <div className="relative min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center px-4">
+      {/* Gradient & blur glows */}
+      <div className="absolute -top-24 -left-24 w-[30rem] h-[30rem] bg-emerald-200 rounded-full filter blur-3xl opacity-30 dark:bg-emerald-700/30 z-0" />
+      <div className="absolute -bottom-24 -right-24 w-[30rem] h-[30rem] bg-teal-200 rounded-full filter blur-3xl opacity-30 dark:bg-teal-700/30 z-0" />
+
+      <div className="relative w-full max-w-2xl z-10">
+        {/* Logo */}
         <div className="flex items-center justify-center mb-8">
           <Shield className="h-10 w-10 text-emerald-500 mr-2" />
-          <h1 className="text-3xl font-bold">MediGuard</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">MediGuard</h1>
         </div>
 
-        <Card>
+        <Card className="shadow-xl border-0 bg-white dark:bg-gray-800">
           <CardHeader>
-            <CardTitle>Welcome</CardTitle>
+            <CardTitle className="text-2xl">Welcome</CardTitle>
             <CardDescription>
               Sign in to your account or create a new one to save your medication history.
             </CardDescription>
           </CardHeader>
+
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
@@ -108,7 +114,11 @@ export default function LoginPage() {
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700"
+                    disabled={isLoading}
+                  >
                     {isLoading ? "Signing in..." : "Sign In"}
                   </Button>
                 </form>
@@ -148,7 +158,11 @@ export default function LoginPage() {
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700"
+                    disabled={isLoading}
+                  >
                     {isLoading ? "Creating account..." : "Create Account"}
                   </Button>
                 </form>
@@ -156,26 +170,29 @@ export default function LoginPage() {
             </Tabs>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>
+              <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {error}
+              </div>
             )}
           </CardContent>
+
           <CardFooter className="flex flex-col space-y-4">
             <div className="relative w-full">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                <span className="bg-white dark:bg-gray-800 px-2 text-gray-500 dark:text-gray-400">Or continue with</span>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline">Google</Button>
-              <Button variant="outline">Facebook</Button>
+            <div className="grid grid-cols-2 gap-4 w-full">
+              <Button variant="outline" className="w-full">Google</Button>
+              <Button variant="outline" className="w-full">Facebook</Button>
             </div>
           </CardFooter>
         </Card>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
           By signing up, you agree to our{" "}
           <Link href="/terms" className="text-emerald-600 hover:underline">
             Terms of Service
