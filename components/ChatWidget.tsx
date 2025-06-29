@@ -30,7 +30,7 @@ export function ChatWidget() {
           <div className="w-full max-w-4xl sm:max-w-5xl bg-white shadow-2xl rounded-t-2xl sm:rounded-2xl overflow-hidden animate-in slide-in-from-bottom duration-300 flex flex-col h-[95%] sm:h-[90%]">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b bg-white z-10">
-              <h2 className="text-lg font-semibold text-emerald-600">MediGuard Assistant</h2>
+              <h2 className="text-lg font-semibold text-emerald-600">Salty - MediGuard Assistant</h2>
               <button onClick={() => setIsOpen(false)}>
                 <X className="w-5 h-5 text-gray-500 hover:text-red-500" />
               </button>
